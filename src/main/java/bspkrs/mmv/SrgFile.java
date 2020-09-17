@@ -28,14 +28,14 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class SrgFile {
-    public final Map<String, ClassSrgData> srgName2ClassData = new TreeMap<String, ClassSrgData>();            // full/pkg/ClassSrgName -> ClassSrgData
-    public final Map<String, Set<ClassSrgData>> srgPkg2ClassDataSet = new TreeMap<String, Set<ClassSrgData>>();       // full/pkg -> Set<ClassSrgData>
-    public final Map<String, FieldSrgData> srgName2FieldData = new TreeMap<String, FieldSrgData>();            // field_12345_a -> FieldSrgData
-    public final Map<String, MethodSrgData> srgName2MethodData = new TreeMap<String, MethodSrgData>();           // func_12345_a -> MethodSrgData
-    public final Map<ClassSrgData, Set<MethodSrgData>> class2MethodDataSet = new TreeMap<ClassSrgData, Set<MethodSrgData>>();
-    public final Map<ClassSrgData, Set<FieldSrgData>> class2FieldDataSet = new TreeMap<ClassSrgData, Set<FieldSrgData>>();
-    public final Map<String, ClassSrgData> srgMethod2ClassData = new TreeMap<String, ClassSrgData>();            // func_12345_a -> ClassSrgData
-    public final Map<String, ClassSrgData> srgField2ClassData = new TreeMap<String, ClassSrgData>();            // field_12345_a -> ClassSrgData
+    public final Map<String, ClassSrgData> srgName2ClassData = new TreeMap<>();            // full/pkg/ClassSrgName -> ClassSrgData
+    public final Map<String, Set<ClassSrgData>> srgPkg2ClassDataSet = new TreeMap<>();       // full/pkg -> Set<ClassSrgData>
+    public final Map<String, FieldSrgData> srgName2FieldData = new TreeMap<>();            // field_12345_a -> FieldSrgData
+    public final Map<String, MethodSrgData> srgName2MethodData = new TreeMap<>();           // func_12345_a -> MethodSrgData
+    public final Map<ClassSrgData, Set<MethodSrgData>> class2MethodDataSet = new TreeMap<>();
+    public final Map<ClassSrgData, Set<FieldSrgData>> class2FieldDataSet = new TreeMap<>();
+    public final Map<String, ClassSrgData> srgMethod2ClassData = new TreeMap<>();            // func_12345_a -> ClassSrgData
+    public final Map<String, ClassSrgData> srgField2ClassData = new TreeMap<>();            // field_12345_a -> ClassSrgData
 
     public SrgFile(File f) throws IOException {
         Scanner in = new Scanner(new BufferedReader(new FileReader(f)));
@@ -52,16 +52,16 @@ public class SrgFile {
                     ClassSrgData classData = new ClassSrgData(obf, srgName, pkgName, in.hasNext("#C"));
 
                     if (!srgPkg2ClassDataSet.containsKey(pkgName))
-                        srgPkg2ClassDataSet.put(pkgName, new TreeSet<ClassSrgData>());
+                        srgPkg2ClassDataSet.put(pkgName, new TreeSet<>());
                     srgPkg2ClassDataSet.get(pkgName).add(classData);
 
                     srgName2ClassData.put(pkgName + "/" + srgName, classData);
 
                     if (!class2MethodDataSet.containsKey(classData))
-                        class2MethodDataSet.put(classData, new TreeSet<MethodSrgData>());
+                        class2MethodDataSet.put(classData, new TreeSet<>());
 
                     if (!class2FieldDataSet.containsKey(classData))
-                        class2FieldDataSet.put(classData, new TreeSet<FieldSrgData>());
+                        class2FieldDataSet.put(classData, new TreeSet<>());
                 } else if (in.hasNext("FD:")) {
                     // FD: aql/c net/minecraft/block/BlockStoneBrick/field_94408_c #C
                     in.next(); // skip FD:

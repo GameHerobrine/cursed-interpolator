@@ -36,13 +36,12 @@ public class CsvFile {
     public CsvFile(File file, Side side) throws IOException {
         this.file = file;
         this.side = side;
-        this.srgName2CsvData = new TreeMap<String, CsvData>();
+        this.srgName2CsvData = new TreeMap<>();
         readFromFile();
     }
 
     public void readFromFile() throws IOException {
-        Scanner in = new Scanner(new BufferedReader(new FileReader(file)));
-        try {
+        try (Scanner in = new Scanner(new BufferedReader(new FileReader(file)))) {
             in.useDelimiter(",");
             in.nextLine(); // Skip header row
             while (in.hasNextLine()) {
@@ -51,11 +50,9 @@ public class CsvFile {
                 String side = in.next();
                 String comment = in.nextLine();
                 comment = comment.substring(1); // removes the ','
-                if (sideIn(Integer.valueOf(side), this.side.intSide))
-                    srgName2CsvData.put(srgName, new CsvData(srgName, mcpName, Integer.valueOf(side), comment));
+                if (sideIn(Integer.parseInt(side), this.side.intSide))
+                    srgName2CsvData.put(srgName, new CsvData(srgName, mcpName, Integer.parseInt(side), comment));
             }
-        } finally {
-            in.close();
         }
     }
 

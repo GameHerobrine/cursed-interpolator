@@ -43,7 +43,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     private boolean isColumnDataIncluded;
     private boolean isOnlyAdjustLarger;
     private boolean isDynamicAdjustment;
-    private Map<TableColumn, Integer> columnSizes = new HashMap<TableColumn, Integer>();
+    private Map<TableColumn, Integer> columnSizes = new HashMap<>();
 
     /*
      *  Specify the table and use default spacing
@@ -142,9 +142,8 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
         TableCellRenderer cellRenderer = table.getCellRenderer(row, column);
         Component c = table.prepareRenderer(cellRenderer, row, column);
-        int width = c.getPreferredSize().width + table.getIntercellSpacing().width;
 
-        return width;
+        return c.getPreferredSize().width + table.getIntercellSpacing().width;
     }
 
     /*
@@ -164,7 +163,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
             width = Math.max(width, tableColumn.getPreferredWidth());
         }
 
-        columnSizes.put(tableColumn, new Integer(tableColumn.getWidth()));
+        columnSizes.put(tableColumn, tableColumn.getWidth());
         table.getTableHeader().setResizingColumn(tableColumn);
         tableColumn.setWidth(width);
     }
@@ -189,7 +188,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
         if (width != null) {
             table.getTableHeader().setResizingColumn(tableColumn);
-            tableColumn.setWidth(width.intValue());
+            tableColumn.setWidth(width);
         }
     }
 
@@ -346,11 +345,11 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
             if (isSelectedColumn) {
                 int[] columns = table.getSelectedColumns();
 
-                for (int i = 0; i < columns.length; i++) {
+                for (int column : columns) {
                     if (isAdjust)
-                        adjustColumn(columns[i]);
+                        adjustColumn(column);
                     else
-                        restoreColumn(columns[i]);
+                        restoreColumn(column);
                 }
             } else {
                 if (isAdjust)
@@ -384,7 +383,6 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
             if (isToggleLarger) {
                 setOnlyAdjustLarger(!isOnlyAdjustLarger);
-                return;
             }
         }
     }

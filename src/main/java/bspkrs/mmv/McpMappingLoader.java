@@ -34,17 +34,14 @@ import java.util.TreeSet;
 
 public class McpMappingLoader {
 
-    public static final Comparator<String> OBF_COMPARATOR = new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-            if (o1.length() != o2.length())
-                return o1.length() - o2.length();
-            else
-                return o1.compareTo(o2);
-        }
+    public static final Comparator<String> OBF_COMPARATOR = (o1, o2) -> {
+        if (o1.length() != o2.length())
+            return o1.length() - o2.length();
+        else
+            return o1.compareTo(o2);
     };
-    public final Map<MethodSrgData, CsvData> srgMethodData2CsvData = new TreeMap<MethodSrgData, CsvData>();
-    public final Map<FieldSrgData, CsvData> srgFieldData2CsvData = new TreeMap<FieldSrgData, CsvData>();
+    public final Map<MethodSrgData, CsvData> srgMethodData2CsvData = new TreeMap<>();
+    public final Map<FieldSrgData, CsvData> srgFieldData2CsvData = new TreeMap<>();
     private final File mcpDir;
     private final File srgFile;
     private final Side side;
@@ -55,7 +52,7 @@ public class McpMappingLoader {
         this.mcpDir = mcpDir;
         this.side = side;
 
-        String loadFailureReason = "";
+        String loadFailureReason;
         switch (side) {
             case Universal:
                 if (new File(mcpDir, "conf/packaged.srg").exists())
@@ -144,7 +141,7 @@ public class McpMappingLoader {
             progress.set(0);
         }
 
-        Set<ClassSrgData> results = new TreeSet<ClassSrgData>();
+        Set<ClassSrgData> results = new TreeSet<>();
 
         // Search Class objects
         for (ClassSrgData classData : srgFileData.srgName2ClassData.values())
@@ -210,7 +207,7 @@ public class McpMappingLoader {
         }
     }
 
-    public class ClassModel extends AbstractTableModel {
+    public static class ClassModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
         public final String[] columnNames = {"Pkg name", "SRG name", "Obf name", "Client Only"};
         @SuppressWarnings("rawtypes")

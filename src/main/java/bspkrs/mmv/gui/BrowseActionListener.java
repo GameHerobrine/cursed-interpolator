@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class BrowseActionListener implements ActionListener {
 
@@ -89,6 +90,6 @@ public class BrowseActionListener implements ActionListener {
             comboBox.setSelectedItem(path);
         }
 
-        defaultDir.val = new File((String) comboBox.getSelectedItem());
+        defaultDir.val = new File((String) Objects.requireNonNull(comboBox.getSelectedItem()));
     }
 }

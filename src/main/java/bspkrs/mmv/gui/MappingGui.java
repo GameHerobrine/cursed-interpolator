@@ -18,7 +18,6 @@ package bspkrs.mmv.gui;
 
 import bspkrs.mmv.McpMappingLoader;
 import bspkrs.mmv.McpMappingLoader.CantLoadMCPMappingException;
-import bspkrs.mmv.version.AppVersionChecker;
 import immibis.bon.IProgressListener;
 import immibis.bon.gui.Reference;
 import immibis.bon.gui.Side;
@@ -46,7 +45,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -81,11 +79,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
 public class MappingGui extends JFrame {
-    public static final String VERSION_NUMBER = "0.2.2";
+    public static final String VERSION_NUMBER = MappingGui.class.getPackage().getImplementationVersion();
     private static final long serialVersionUID = 1L;
     private final static String PREFS_KEY_MCPDIR = "mcpDir";
     private final static String PREFS_KEY_SIDE = "side";
@@ -93,8 +92,7 @@ public class MappingGui extends JFrame {
     private final static String PREFS_KEY_METHOD_SORT = "methodSort";
     private final static String PREFS_KEY_FIELD_SORT = "fieldSort";
     private final Preferences prefs = Preferences.userNodeForPackage(MappingGui.class);
-    private final Reference<File> mcpBrowseDir = new Reference<File>();
-    private final String versionURL = "http://dl.dropboxusercontent.com/u/20748481/Minecraft/MMV/MMV.version";
+    private final Reference<File> mcpBrowseDir = new Reference<>();
     private final String mcfTopic = "http://www.minecraftforum.net/topic/2115030-";
     private JFrame frmMcpMappingViewer;
     private JButton btnRefreshTables;
@@ -106,16 +104,15 @@ public class MappingGui extends JFrame {
     private JPanel pnlFilter;
     private JTextField edtFilter;
     private JButton btnSearch;
-    private List<RowSorter.SortKey> classSort = new ArrayList<RowSorter.SortKey>();
-    private List<RowSorter.SortKey> methodSort = new ArrayList<RowSorter.SortKey>();
-    private List<RowSorter.SortKey> fieldSort = new ArrayList<RowSorter.SortKey>();
+    private List<RowSorter.SortKey> classSort = new ArrayList<>();
+    private List<RowSorter.SortKey> methodSort = new ArrayList<>();
+    private List<RowSorter.SortKey> fieldSort = new ArrayList<>();
     private JTable tblClasses;
     private JTable tblMethods;
     private JTable tblFields;
     private Thread curTask = null;
     private Map<String, McpMappingLoader> mcpInstances = new HashMap<>();
     private McpMappingLoader currentLoader;
-    private AppVersionChecker versionChecker;
     private DefaultTableModel classesDefaultModel = new DefaultTableModel(
             new Object[][]{
                     {},
@@ -128,12 +125,11 @@ public class MappingGui extends JFrame {
         boolean[] columnEditables = new boolean[]{
                 false, false, false, false
         };
-        @SuppressWarnings("rawtypes")
+
         Class[] columnTypes = new Class[]{
                 String.class, String.class, String.class, Boolean.class
         };
 
-        @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
         public Class getColumnClass(int columnIndex) {
             return columnTypes[columnIndex];
@@ -156,12 +152,11 @@ public class MappingGui extends JFrame {
         boolean[] columnEditables = new boolean[]{
                 false, false, false, false, false, false
         };
-        @SuppressWarnings("rawtypes")
+
         Class[] columnTypes = new Class[]{
                 String.class, String.class, String.class, String.class, String.class, Boolean.class
         };
 
-        @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
         public Class getColumnClass(int columnIndex) {
             return columnTypes[columnIndex];
@@ -184,12 +179,10 @@ public class MappingGui extends JFrame {
         boolean[] columnEditables = new boolean[]{
                 false, false, false, false, false
         };
-        @SuppressWarnings("rawtypes")
         Class[] columnTypes = new Class[]{
                 String.class, String.class, String.class, String.class, Boolean.class
         };
 
-        @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
         public Class getColumnClass(int columnIndex) {
             return columnTypes[columnIndex];
@@ -206,35 +199,31 @@ public class MappingGui extends JFrame {
      */
     public MappingGui() {
         initialize();
-        checkForUpdates();
     }
 
     /**
      * Launch the application.
      */
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    MappingGui window = new MappingGui();
-                    window.frmMcpMappingViewer.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                MappingGui window = new MappingGui();
+                window.frmMcpMappingViewer.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
 
     private static String getPrintableStackTrace(Throwable e, Set<StackTraceElement> stopAt) {
-        String s = e.toString();
+        StringBuilder s = new StringBuilder(e.toString());
         int numPrinted = 0;
         for (StackTraceElement ste : e.getStackTrace()) {
             boolean stopHere = false;
             if (stopAt.contains(ste) && numPrinted > 0)
                 stopHere = true;
             else {
-                s += "\n    at " + ste.toString();
+                s.append("\n    at ").append(ste.toString());
                 numPrinted++;
                 if (ste.getClassName().startsWith("javax.swing."))
                     stopHere = true;
@@ -242,23 +231,23 @@ public class MappingGui extends JFrame {
 
             if (stopHere) {
                 int numHidden = e.getStackTrace().length - numPrinted;
-                s += "\n    ... " + numHidden + " more";
+                s.append("\n    ... ").append(numHidden).append(" more");
                 break;
             }
         }
-        return s;
+        return s.toString();
     }
 
     private static String getStackTraceMessage(String prefix, Throwable e) {
-        String s = prefix;
+        StringBuilder s = new StringBuilder(prefix);
 
-        s += "\n" + getPrintableStackTrace(e, Collections.emptySet());
+        s.append("\n").append(getPrintableStackTrace(e, Collections.emptySet()));
         while (e.getCause() != null) {
-            Set<StackTraceElement> stopAt = new HashSet<StackTraceElement>(Arrays.asList(e.getStackTrace()));
+            Set<StackTraceElement> stopAt = new HashSet<>(Arrays.asList(e.getStackTrace()));
             e = e.getCause();
-            s += "\nCaused by: " + getPrintableStackTrace(e, stopAt);
+            s.append("\nCaused by: ").append(getPrintableStackTrace(e, stopAt));
         }
-        return s;
+        return s.toString();
     }
 
     public static void showHTMLDialog(Component parentComponent,
@@ -266,21 +255,15 @@ public class MappingGui extends JFrame {
         JLabel label = new JLabel();
         Font font = label.getFont();
 
-        StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
-        style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
-        style.append("font-size:" + font.getSize() + "pt;");
-
+        String style = "font-family:" + font.getFamily() + ";" + "font-weight:" + (font.isBold() ? "bold" : "normal") + ";" + "font-size:" + font.getSize() + "pt;";
         JEditorPane ep = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" + message.toString() + "</body></html>");
 
-        ep.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED))
-                    try {
-                        Desktop.getDesktop().browse(e.getURL().toURI());
-                    } catch (Throwable ignore) {
-                    }
-            }
+        ep.addHyperlinkListener(e -> {
+            if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED))
+                try {
+                    Desktop.getDesktop().browse(e.getURL().toURI());
+                } catch (Throwable ignore) {
+                }
         });
         ep.setEditable(false);
         ep.setBackground(label.getBackground());
@@ -291,7 +274,7 @@ public class MappingGui extends JFrame {
         for (int i = 0; i < cmbMCPDirPath.getItemCount(); i++)
             prefs.put(PREFS_KEY_MCPDIR + i, cmbMCPDirPath.getItemAt(i));
 
-        prefs.put(PREFS_KEY_SIDE, cmbSide.getSelectedItem().toString());
+        prefs.put(PREFS_KEY_SIDE, Objects.requireNonNull(cmbSide.getSelectedItem()).toString());
 
         if (tblClasses.getRowSorter().getSortKeys().size() > 0) {
             int i = tblClasses.getRowSorter().getSortKeys().get(0).getColumn() + 1;
@@ -349,15 +332,6 @@ public class MappingGui extends JFrame {
         i = prefs.getInt(PREFS_KEY_FIELD_SORT, 1);
         fieldSort.add(new RowSorter.SortKey(Math.abs(i) - 1, (i > 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING)));
         tblFields.getRowSorter().setSortKeys(fieldSort);
-    }
-
-    private void checkForUpdates() {
-        versionChecker = new AppVersionChecker("MCP Mapping Viewer", VERSION_NUMBER, versionURL, mcfTopic,
-                new String[]{"{appName} {oldVer} is out of date! Visit {updateURL} to download the latest release ({newVer})."},
-                new String[]{"{appName} {oldVer} is out of date! <br/><br/>Download the latest release ({newVer}) from <a href=\"{updateURL}\">{updateURL}</a>."}, 5000);
-        if (!versionChecker.isCurrentVersion()) {
-            showHTMLDialog(MappingGui.this, versionChecker.getDialogMessage()[0], "An update is available", JOptionPane.INFORMATION_MESSAGE);
-        }
     }
 
     /**
@@ -453,11 +427,11 @@ public class MappingGui extends JFrame {
         JLabel lblSide = new JLabel("Side");
         pnlControls.add(lblSide);
 
-        cmbSide = new JComboBox<Side>();
-        cmbSide.setModel(new DefaultComboBoxModel<Side>(Side.values()));
+        cmbSide = new JComboBox<>();
+        cmbSide.setModel(new DefaultComboBoxModel<>(Side.values()));
         pnlControls.add(cmbSide);
 
-        cmbMCPDirPath = new JComboBox<String>(new DefaultComboBoxModel<String>());
+        cmbMCPDirPath = new JComboBox<>(new DefaultComboBoxModel<>());
         cmbMCPDirPath.setPreferredSize(new Dimension(320, 20));
         cmbMCPDirPath.addItemListener(new ComboItemChanged());
 
@@ -583,7 +557,7 @@ public class MappingGui extends JFrame {
                 @SuppressWarnings("unchecked")
                 JComboBox<String> cmb = (JComboBox<String>) e.getSource();
                 String path = (String) cmb.getSelectedItem();
-                if (!path.isEmpty())
+                if (path != null && !path.isEmpty())
                     mcpBrowseDir.val = new File(path);
                 else
                     mcpBrowseDir.val = new File(".");
@@ -643,90 +617,68 @@ public class MappingGui extends JFrame {
             tblFields.setModel(fieldsDefaultModel);
             tblFields.setEnabled(false);
 
-            curTask = new Thread() {
-                @Override
-                public void run() {
-                    boolean crashed = false;
+            curTask = new Thread(() -> {
+                boolean crashed = false;
 
-                    try {
-                        IProgressListener progress = new IProgressListener() {
-                            private String currentText;
+                try {
+                    IProgressListener progress = new IProgressListener() {
+                        private String currentText;
 
-                            @Override
-                            public void start(final int max, final String text) {
-                                currentText = text.equals("") ? " " : text;
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        progressBar.setString(currentText);
-                                        if (max >= 0)
-                                            progressBar.setMaximum(max);
-                                        progressBar.setValue(0);
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void set(final int value) {
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        progressBar.setValue(value);
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void setMax(final int max) {
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        progressBar.setMaximum(max);
-                                    }
-                                });
-                            }
-                        };
-
-                        progress.start(0, "Searching MCP objects for input");
-                        tblClasses.setModel(currentLoader.getSearchResults(edtFilter.getText(), progress));
-                        tblClasses.setEnabled(true);
-                        new TableColumnAdjuster(tblClasses).adjustColumns();
-                        loadPrefs();
-                    } catch (Exception e) {
-                        String s = getStackTraceMessage("An error has occurred - give bspkrs this stack trace (which has been copied to the clipboard)\n", e);
-
-                        System.err.println(s);
-
-                        crashed = true;
-
-                        final String errMsg = s;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setString(" ");
+                        @Override
+                        public void start(final int max, final String text) {
+                            currentText = text.equals("") ? " " : text;
+                            SwingUtilities.invokeLater(() -> {
+                                progressBar.setString(currentText);
+                                if (max >= 0)
+                                    progressBar.setMaximum(max);
                                 progressBar.setValue(0);
-
-                                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(errMsg), null);
-                                JOptionPane.showMessageDialog(MappingGui.this, errMsg, "MMV - Error", JOptionPane.ERROR_MESSAGE);
-                            }
-                        });
-                    } finally {
-                        if (!crashed) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setString(" ");
-                                    progressBar.setValue(0);
-                                    edtFilter.setEnabled(true);
-                                }
                             });
                         }
-                        pnlProgress.setVisible(false);
-                        edtFilter.setEnabled(true);
-                        btnSearch.setEnabled(true);
+
+                        @Override
+                        public void set(final int value) {
+                            SwingUtilities.invokeLater(() -> progressBar.setValue(value));
+                        }
+
+                        @Override
+                        public void setMax(final int max) {
+                            SwingUtilities.invokeLater(() -> progressBar.setMaximum(max));
+                        }
+                    };
+
+                    progress.start(0, "Searching MCP objects for input");
+                    tblClasses.setModel(currentLoader.getSearchResults(edtFilter.getText(), progress));
+                    tblClasses.setEnabled(true);
+                    new TableColumnAdjuster(tblClasses).adjustColumns();
+                    loadPrefs();
+                } catch (Exception e1) {
+                    String s = getStackTraceMessage("An error has occurred - give bspkrs this stack trace (which has been copied to the clipboard)\n", e1);
+
+                    System.err.println(s);
+
+                    crashed = true;
+
+                    final String errMsg = s;
+                    SwingUtilities.invokeLater(() -> {
+                        progressBar.setString(" ");
+                        progressBar.setValue(0);
+
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(errMsg), null);
+                        JOptionPane.showMessageDialog(MappingGui.this, errMsg, "MMV - Error", JOptionPane.ERROR_MESSAGE);
+                    });
+                } finally {
+                    if (!crashed) {
+                        SwingUtilities.invokeLater(() -> {
+                            progressBar.setString(" ");
+                            progressBar.setValue(0);
+                            edtFilter.setEnabled(true);
+                        });
                     }
+                    pnlProgress.setVisible(false);
+                    edtFilter.setEnabled(true);
+                    btnSearch.setEnabled(true);
                 }
-            };
+            });
 
             curTask.start();
         }
@@ -738,7 +690,7 @@ public class MappingGui extends JFrame {
             if (curTask != null && curTask.isAlive())
                 return;
 
-            final Side side = (Side) cmbSide.getSelectedItem();
+            final Side side = Objects.requireNonNull((Side) cmbSide.getSelectedItem());
 
             final File mcpDir = mcpBrowseDir.val;
             final File confDir = new File(mcpDir, "conf");
@@ -777,118 +729,93 @@ public class MappingGui extends JFrame {
             tblFields.setModel(fieldsDefaultModel);
             tblFields.setEnabled(false);
 
-            curTask = new Thread() {
-                @Override
-                public void run() {
-                    boolean crashed = false;
+            curTask = new Thread(() -> {
+                boolean crashed = false;
 
-                    try {
-                        IProgressListener progress = new IProgressListener() {
-                            private String currentText;
+                try {
+                    IProgressListener progress = new IProgressListener() {
+                        private String currentText;
 
-                            @Override
-                            public void start(final int max, final String text) {
-                                currentText = text.equals("") ? " " : text;
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        progressBar.setString(currentText);
-                                        if (max >= 0)
-                                            progressBar.setMaximum(max);
-                                        progressBar.setValue(0);
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void set(final int value) {
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        progressBar.setValue(value);
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void setMax(final int max) {
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        progressBar.setMaximum(max);
-                                    }
-                                });
-                            }
-                        };
-
-                        if (!mcpInstances.containsKey(mcpDir.getAbsolutePath() + " " + side) || chkForceRefresh.isSelected()) {
-                            progress.start(0, "Reading MCP configuration");
-                            currentLoader = new McpMappingLoader(side, mcpDir, progress);
-                            mcpInstances.put(mcpDir.getAbsolutePath() + " " + side, currentLoader);
-                            chkForceRefresh.setSelected(false);
-                        } else
-                            currentLoader = mcpInstances.get(mcpDir.getAbsolutePath() + " " + side);
-
-                        tblClasses.setModel(currentLoader.getClassModel());
-                        tblClasses.setEnabled(true);
-                        new TableColumnAdjuster(tblClasses).adjustColumns();
-                        //                        TableRowSorter trs = (TableRowSorter) tblClasses.getRowSorter();
-                        //                        trs.setComparator(2, McpMappingLoader.OBF_COMPARATOR);
-                        loadPrefs();
-                    } catch (CantLoadMCPMappingException e) {
-                        String s = getStackTraceMessage("", e);
-
-                        System.err.println(s);
-
-                        crashed = true;
-
-                        final String errMsg = s;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setString(" ");
+                        @Override
+                        public void start(final int max, final String text) {
+                            currentText = text.equals("") ? " " : text;
+                            SwingUtilities.invokeLater(() -> {
+                                progressBar.setString(currentText);
+                                if (max >= 0)
+                                    progressBar.setMaximum(max);
                                 progressBar.setValue(0);
-
-                                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(errMsg), null);
-                                JOptionPane.showMessageDialog(MappingGui.this, errMsg, "MMV - Error", JOptionPane.ERROR_MESSAGE);
-                            }
-                        });
-                    } catch (Exception e) {
-                        String s = getStackTraceMessage("An error has occurred - give bspkrs this stack trace (which has been copied to the clipboard)\n", e);
-
-                        System.err.println(s);
-
-                        crashed = true;
-
-                        final String errMsg = s;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setString(" ");
-                                progressBar.setValue(0);
-
-                                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(errMsg), null);
-                                JOptionPane.showMessageDialog(MappingGui.this, errMsg, "MMV - Error", JOptionPane.ERROR_MESSAGE);
-                            }
-                        });
-                    } finally {
-                        if (!crashed) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setString(" ");
-                                    progressBar.setValue(0);
-                                    edtFilter.setEnabled(true);
-                                }
                             });
                         }
-                        pnlProgress.setVisible(false);
-                        pnlFilter.setVisible(true);
-                        edtFilter.setEnabled(true);
-                        btnSearch.setEnabled(true);
+
+                        @Override
+                        public void set(final int value) {
+                            SwingUtilities.invokeLater(() -> progressBar.setValue(value));
+                        }
+
+                        @Override
+                        public void setMax(final int max) {
+                            SwingUtilities.invokeLater(() -> progressBar.setMaximum(max));
+                        }
+                    };
+
+                    if (!mcpInstances.containsKey(mcpDir.getAbsolutePath() + " " + side) || chkForceRefresh.isSelected()) {
+                        progress.start(0, "Reading MCP configuration");
+                        currentLoader = new McpMappingLoader(side, mcpDir, progress);
+                        mcpInstances.put(mcpDir.getAbsolutePath() + " " + side, currentLoader);
+                        chkForceRefresh.setSelected(false);
+                    } else
+                        currentLoader = mcpInstances.get(mcpDir.getAbsolutePath() + " " + side);
+
+                    tblClasses.setModel(currentLoader.getClassModel());
+                    tblClasses.setEnabled(true);
+                    new TableColumnAdjuster(tblClasses).adjustColumns();
+                    //                        TableRowSorter trs = (TableRowSorter) tblClasses.getRowSorter();
+                    //                        trs.setComparator(2, McpMappingLoader.OBF_COMPARATOR);
+                    loadPrefs();
+                } catch (CantLoadMCPMappingException e1) {
+                    String s = getStackTraceMessage("", e1);
+
+                    System.err.println(s);
+
+                    crashed = true;
+
+                    final String errMsg = s;
+                    SwingUtilities.invokeLater(() -> {
+                        progressBar.setString(" ");
+                        progressBar.setValue(0);
+
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(errMsg), null);
+                        JOptionPane.showMessageDialog(MappingGui.this, errMsg, "MMV - Error", JOptionPane.ERROR_MESSAGE);
+                    });
+                } catch (Exception e1) {
+                    String s = getStackTraceMessage("An error has occurred - give bspkrs this stack trace (which has been copied to the clipboard)\n", e1);
+
+                    System.err.println(s);
+
+                    crashed = true;
+
+                    final String errMsg = s;
+                    SwingUtilities.invokeLater(() -> {
+                        progressBar.setString(" ");
+                        progressBar.setValue(0);
+
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(errMsg), null);
+                        JOptionPane.showMessageDialog(MappingGui.this, errMsg, "MMV - Error", JOptionPane.ERROR_MESSAGE);
+                    });
+                } finally {
+                    if (!crashed) {
+                        SwingUtilities.invokeLater(() -> {
+                            progressBar.setString(" ");
+                            progressBar.setValue(0);
+                            edtFilter.setEnabled(true);
+                        });
                     }
+                    pnlProgress.setVisible(false);
+                    pnlFilter.setVisible(true);
+                    edtFilter.setEnabled(true);
+                    btnSearch.setEnabled(true);
                 }
-            };
+            });
 
             curTask.start();
         }
