@@ -354,7 +354,7 @@ public class MappingGui extends JFrame {
                 savePrefs();
             }
         });
-        frmMcpMappingViewer.setTitle("MCP Mapping Viewer");
+        frmMcpMappingViewer.setTitle("Cursed Interpolator " + VERSION_NUMBER);
         frmMcpMappingViewer.setBounds(100, 100, 925, 621);
         frmMcpMappingViewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frmMcpMappingViewer.getContentPane().setLayout(new BorderLayout(0, 0));
@@ -525,19 +525,24 @@ public class MappingGui extends JFrame {
         lblAbout.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                String message = "<center>MCP Mapping Viewer v" + VERSION_NUMBER + "<br/>" +
+                String message = "<center>Cursed Interpolator " + VERSION_NUMBER + "<br/>" +
                         "Copyright (C) 2013 bspkrs<br/>" +
                         "Portions Copyright (C) 2013 Alex \"immibis\" Campbell<br/><br/>" +
-                        "Author: bspkrs<br/>" +
-                        "Credits: immibis (for <a href=\"https://github.com/immibis/bearded-octo-nemesis\">BON</a> code), " +
-                        "Searge et al (for <a href=\"http://mcp.ocean-labs.de\">MCP</a>)<br/><br/>" +
+                        "Author: calmilamsy<br/><br/>" +
+                        "Credits: " +
+                        "bspkrs (for the <a href=\"https://github.com/bspkrs/MCPMappingViewer\">program this is a fork of</a>), " +
+                        "immibis (for <a href=\"https://github.com/immibis/bearded-octo-nemesis\">BON</a> code), " +
+                        "Searge et al (for <a href=\"http://mcp.ocean-labs.de\">MCP</a>),<br/>" +
+                        "Fabric (for <a href=\"https://fabricmc.net\">Enigma</a>), " +
+                        "Cursed Fabric (for <a href=\"https://minecraft-cursed-legacy.github.io/\">Their unified b1.7.3 JAR</a>)<br/><br/>" +
+                        "<h3>Original links:</h3>" +
                         "<a href=\"" + mcfTopic + "\">MCF Thread</a><br/>" +
                         "<a href=\"https://github.com/bspkrs/MCPMappingViewer\">Github Repo</a><br/>" +
                         "<a href=\"https://github.com/bspkrs/MCPMappingViewer/blob/master/change.log\">Change Log</a><br/>" +
                         "<a href=\"http://bspk.rs/MC/MCPMappingViewer/index.html\">Binary Downloads</a><br/>" +
                         "<a href=\"https://raw.github.com/bspkrs/MCPMappingViewer/master/LICENSE\">License</a><br/>" +
                         "<a href=\"https://twitter.com/bspkrs\">bspkrs on Twitter</a></center>";
-                showHTMLDialog(MappingGui.this, message, "About MCP Mapping Viewer", JOptionPane.PLAIN_MESSAGE);
+                showHTMLDialog(MappingGui.this, message, "About Cursed Interpolator", JOptionPane.PLAIN_MESSAGE);
             }
         });
 
@@ -693,14 +698,11 @@ public class MappingGui extends JFrame {
             final Side side = Objects.requireNonNull((Side) cmbSide.getSelectedItem());
 
             final File mcpDir = mcpBrowseDir.val;
-            final File confDir = new File(mcpDir, "conf");
 
             String error = null;
 
             if (!mcpDir.isDirectory())
-                error = "MCP folder not found (at " + mcpDir + ")";
-            else if (!confDir.isDirectory())
-                error = "'conf' folder not found in MCP folder (at " + confDir + ")";
+                error = "Folder not found (at " + mcpDir + ")";
 
             if (error != null) {
                 JOptionPane.showMessageDialog(MappingGui.this, error, "MMV - Error", JOptionPane.ERROR_MESSAGE);

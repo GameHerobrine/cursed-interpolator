@@ -25,6 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -42,16 +43,34 @@ public class CsvFile {
 
     public void readFromFile() throws IOException {
         try (Scanner in = new Scanner(new BufferedReader(new FileReader(file)))) {
-            in.useDelimiter(",");
+            in.useDelimiter("[,\\n]");
             in.nextLine(); // Skip header row
-            while (in.hasNextLine()) {
-                String srgName = in.next();
-                String mcpName = in.next();
-                String side = in.next();
-                String comment = in.nextLine();
-                comment = comment.substring(1); // removes the ','
-                if (sideIn(Integer.parseInt(side), this.side.intSide))
-                    srgName2CsvData.put(srgName, new CsvData(srgName, mcpName, Integer.parseInt(side), comment));
+            try {
+                while (in.hasNextLine()) {
+                    String srgName = in.next().replace("\"", "");
+                    String mcpName = in.next().replace("\"", "");
+                    String obfName = in.next().replace("\"", "");
+                    in.next(); // Skip signatures
+                    in.next();
+                    in.next(); // Skip parent classes
+                    in.next();
+                    String pkg = in.next().replace("\"", "");
+                    String side = in.next().replace("\"", "");
+                    String comment;
+                    if (!side.endsWith("\r")) {
+                        comment = in.next().replace("\r", "");
+                    }
+                    else {
+                        side = side.replace("\r", "");
+                        comment = "";
+                    }
+                    //String comment = in.nextLine();
+                    //comment = comment.substring(1); // removes the ','
+                    if (sideIn(Integer.parseInt(side), this.side.intSide))
+                        srgName2CsvData.put(srgName, new CsvData(srgName, mcpName, Integer.parseInt(side), comment));
+                }
+            } catch (NoSuchElementException e) {
+                System.out.println("Found EOF!");
             }
         }
     }

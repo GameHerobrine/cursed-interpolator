@@ -55,20 +55,20 @@ public class McpMappingLoader {
         String loadFailureReason;
         switch (side) {
             case Universal:
-                if (new File(mcpDir, "conf/packaged.srg").exists())
-                    srgFile = new File(mcpDir, "conf/packaged.srg");
+                if (new File(mcpDir, "packaged.srg").exists())
+                    srgFile = new File(mcpDir, "packaged.srg");
                 else
-                    srgFile = new File(mcpDir, "conf/joined.srg");
+                    srgFile = new File(mcpDir, "joined.srg");
                 loadFailureReason = "Unable to find packaged.srg or joined.srg. Try using side Client or Server.";
                 break;
 
             case Client:
-                srgFile = new File(mcpDir, "conf/client.srg");
+                srgFile = new File(mcpDir, "client.srg");
                 loadFailureReason = "Unable to find client.srg. If using Forge, use side Universal.";
                 break;
 
             case Server:
-                srgFile = new File(mcpDir, "conf/server.srg");
+                srgFile = new File(mcpDir, "server.srg");
                 loadFailureReason = "Unable to find server.srg. If using Forge, use side Universal.";
                 break;
 
@@ -93,7 +93,7 @@ public class McpMappingLoader {
     }
 
     public static String getMCVer(File mcpDir) throws IOException {
-        try (Scanner in = new Scanner(new File(mcpDir, "conf/version.cfg"))) {
+        try (Scanner in = new Scanner(new File(mcpDir, "version.cfg"))) {
             while (in.hasNextLine()) {
                 String line = in.nextLine();
                 if (line.startsWith("ClientVersion"))
@@ -108,8 +108,8 @@ public class McpMappingLoader {
     }
 
     private void loadCSVMapping() throws IOException {
-        csvFieldData = new CsvFile(new File(mcpDir, "conf/fields.csv"), side);
-        csvMethodData = new CsvFile(new File(mcpDir, "conf/methods.csv"), side);
+        csvFieldData = new CsvFile(new File(mcpDir, "fields.csv"), side);
+        csvMethodData = new CsvFile(new File(mcpDir, "methods.csv"), side);
     }
 
     private void linkSrgDataToCsvData() {
