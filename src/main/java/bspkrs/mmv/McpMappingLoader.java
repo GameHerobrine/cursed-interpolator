@@ -55,20 +55,26 @@ public class McpMappingLoader {
         String loadFailureReason;
         switch (side) {
             case Universal:
-                if (new File(mcpDir, "packaged.srg").exists())
-                    srgFile = new File(mcpDir, "packaged.srg");
+                if (new File(mcpDir, "conf/packaged.srg").exists())
+                    srgFile = new File(mcpDir, "conf/packaged.srg");
                 else
-                    srgFile = new File(mcpDir, "joined.srg");
+                    srgFile = new File(mcpDir, "conf/joined.srg");
                 loadFailureReason = "Unable to find packaged.srg or joined.srg. Try using side Client or Server.";
                 break;
 
             case Client:
-                srgFile = new File(mcpDir, "client.srg");
+                if (new File(mcpDir, "conf/client.srg").exists())
+                    srgFile = new File(mcpDir, "conf/client.srg");
+                else
+                    srgFile = new File(mcpDir, "temp/client_rg.srg");
                 loadFailureReason = "Unable to find client.srg. If using Forge, use side Universal.";
                 break;
 
             case Server:
-                srgFile = new File(mcpDir, "server.srg");
+                if (new File(mcpDir, "conf/server.srg").exists())
+                    srgFile = new File(mcpDir, "conf/server.srg");
+                else
+                    srgFile = new File(mcpDir, "temp/server_rg.srg");
                 loadFailureReason = "Unable to find server.srg. If using Forge, use side Universal.";
                 break;
 
@@ -78,6 +84,10 @@ public class McpMappingLoader {
 
         if (!srgFile.exists())
             throw new CantLoadMCPMappingException(loadFailureReason);
+        else if (!(new File(mcpDir + "/conf")).exists())
+            throw new CantLoadMCPMappingException("Unable to find MCP config folder!");
+        else if (!(new File(mcpDir + "/temp")).exists())
+            throw new CantLoadMCPMappingException("Unable to find MCP temp folder!");
 
         if (progress != null)
             progress.setMax(3);
@@ -93,7 +103,7 @@ public class McpMappingLoader {
     }
 
     public static String getMCVer(File mcpDir) throws IOException {
-        try (Scanner in = new Scanner(new File(mcpDir, "version.cfg"))) {
+        try (Scanner in = new Scanner(new File(mcpDir, "conf/version.cfg"))) {
             while (in.hasNextLine()) {
                 String line = in.nextLine();
                 if (line.startsWith("ClientVersion"))
@@ -108,8 +118,8 @@ public class McpMappingLoader {
     }
 
     private void loadCSVMapping() throws IOException {
-        csvFieldData = new CsvFile(new File(mcpDir, "fields.csv"), side);
-        csvMethodData = new CsvFile(new File(mcpDir, "methods.csv"), side);
+        csvFieldData = new CsvFile(new File(mcpDir, "conf/fields.csv"), side);
+        csvMethodData = new CsvFile(new File(mcpDir, "conf/methods.csv"), side);
     }
 
     private void linkSrgDataToCsvData() {
@@ -210,7 +220,6 @@ public class McpMappingLoader {
     public static class ClassModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
         public final String[] columnNames = {"Pkg name", "SRG name", "Obf name", "Client Only"};
-        @SuppressWarnings("rawtypes")
         private final Class[] columnTypes = {String.class, String.class, String.class, Boolean.class};
         private final boolean[] isColumnEditable = {false, false, false, false};
         private final Object[][] data;
