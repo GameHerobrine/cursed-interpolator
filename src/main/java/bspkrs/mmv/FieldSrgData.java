@@ -21,14 +21,18 @@ public class FieldSrgData implements Comparable<FieldSrgData> {
     private final String srgOwner;
     private final String srgPkg;
     private final String srgName;
+    private final String cursedName;
+    private final String intermediaryName;
     private final boolean isClientOnly;
 
-    public FieldSrgData(String obfOwner, String obfName, String srgOwner, String srgPkg, String srgName, boolean isClientOnly) {
+    public FieldSrgData(String obfOwner, String obfName, String srgOwner, String srgPkg, String srgName, String intermediaryName, String cursedName, boolean isClientOnly) {
         this.obfOwner = obfOwner;
         this.obfName = obfName;
         this.srgOwner = srgOwner;
         this.srgPkg = srgPkg;
         this.srgName = srgName;
+        this.intermediaryName = intermediaryName;
+        this.cursedName = cursedName;
         this.isClientOnly = isClientOnly;
     }
 
@@ -46,6 +50,14 @@ public class FieldSrgData implements Comparable<FieldSrgData> {
 
     public String getSrgName() {
         return srgName;
+    }
+
+    public String getCursedName() {
+        return cursedName;
+    }
+
+    public String getIntermediaryName() {
+        return intermediaryName;
     }
 
     public boolean isClientOnly() {

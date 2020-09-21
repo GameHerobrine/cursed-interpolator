@@ -18,10 +18,13 @@ package bspkrs.mmv;
 
 import immibis.bon.IProgressListener;
 import immibis.bon.gui.Side;
+import net.fabricmc.mappings.Mappings;
+import net.fabricmc.mappings.MappingsProvider;
 
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
@@ -90,15 +93,18 @@ public class McpMappingLoader {
             throw new CantLoadMCPMappingException("Unable to find MCP temp folder!");
 
         if (progress != null)
-            progress.setMax(3);
+            progress.setMax(4);
         if (progress != null)
             progress.set(0);
-        loadCSVMapping();
+        Mappings mappings = MappingsProvider.readTinyMappings(new FileInputStream(new File(mcpDir, "conf/mappings.tiny")));
         if (progress != null)
             progress.set(1);
-        loadSRGMapping();
+        loadCSVMapping();
         if (progress != null)
             progress.set(2);
+        loadSRGMapping(mappings);
+        if (progress != null)
+            progress.set(3);
         linkSrgDataToCsvData();
     }
 
@@ -113,8 +119,8 @@ public class McpMappingLoader {
         }
     }
 
-    private void loadSRGMapping() throws IOException {
-        srgFileData = new SrgFile(srgFile);
+    private void loadSRGMapping(Mappings mappings) throws IOException {
+        srgFileData = new SrgFile(srgFile, mappings, csvFieldData, csvMethodData, String.valueOf(side).toLowerCase());
     }
 
     private void loadCSVMapping() throws IOException {
@@ -219,9 +225,9 @@ public class McpMappingLoader {
 
     public static class ClassModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
-        public final String[] columnNames = {"Pkg name", "SRG name", "Obf name", "Client Only"};
-        private final Class[] columnTypes = {String.class, String.class, String.class, Boolean.class};
-        private final boolean[] isColumnEditable = {false, false, false, false};
+        public final String[] columnNames = {"Pkg name", "SRG name", "Obf name", "Intermediary name", "Cursed name", "Client Only"};
+        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, Boolean.class};
+        private final boolean[] isColumnEditable = {false, false, false, false, false, false};
         private final Object[][] data;
         private final Collection<ClassSrgData> collectionRef;
 
@@ -235,7 +241,9 @@ public class McpMappingLoader {
                 data[i][0] = classData.getSrgPkgName();
                 data[i][1] = classData.getSrgName();
                 data[i][2] = classData.getObfName();
-                data[i][3] = classData.isClientOnly();
+                data[i][3] = classData.getIntermediaryName();
+                data[i][4] = classData.getCursedName();
+                data[i][5] = classData.isClientOnly();
                 i++;
             }
         }
@@ -281,10 +289,9 @@ public class McpMappingLoader {
 
     public class MethodModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
-        private final String[] columnNames = {"MCP Name", "SRG Name", "Obf Name", "SRG Descriptor", "Comment", "Client Only"};
-        @SuppressWarnings("rawtypes")
-        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, Boolean.class};
-        private final boolean[] isColumnEditable = {false, false, false, false, false, false};
+        private final String[] columnNames = {"MCP Name", "SRG Name", "Obf Name", "SRG Descriptor", "Intermediary name", "Cursed name", "Comment", "Client Only"};
+        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, String.class, String.class, Boolean.class};
+        private final boolean[] isColumnEditable = {false, false, false, false, false, false, false, false};
         private final Object[][] data;
         private final Set<MethodSrgData> setRef;
 
@@ -297,15 +304,17 @@ public class McpMappingLoader {
                 CsvData csvData = srgMethodData2CsvData.get(methodData);
                 if (csvData != null) {
                     data[i][0] = csvData.getMcpName();
-                    data[i][4] = csvData.getComment();
+                    data[i][6] = csvData.getComment();
                 } else {
                     data[i][0] = "";
-                    data[i][4] = "";
+                    data[i][6] = "";
                 }
                 data[i][1] = methodData.getSrgName();
                 data[i][2] = methodData.getObfName();
                 data[i][3] = methodData.getSrgDescriptor();
-                data[i][5] = methodData.isClientOnly();
+                data[i][4] = methodData.getIntermediaryName();
+                data[i][5] = methodData.getCursedName();
+                data[i][7] = methodData.isClientOnly();
                 i++;
             }
         }
@@ -351,10 +360,9 @@ public class McpMappingLoader {
 
     public class FieldModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
-        private final String[] columnNames = {"MCP Name", "SRG Name", "Obf Name", "Comment", "Client Only"};
-        @SuppressWarnings("rawtypes")
-        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, Boolean.class};
-        private final boolean[] isColumnEditable = {false, false, false, false, false};
+        private final String[] columnNames = {"MCP Name", "SRG Name", "Obf Name", "Intermediary name", "Cursed name", "Comment", "Client Only"};
+        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, String.class, Boolean.class};
+        private final boolean[] isColumnEditable = {false, false, false, false, false, false, false};
         private final Object[][] data;
         private final Set<FieldSrgData> setRef;
 
@@ -367,14 +375,16 @@ public class McpMappingLoader {
                 CsvData csvData = srgFieldData2CsvData.get(fieldData);
                 if (csvData != null) {
                     data[i][0] = csvData.getMcpName();
-                    data[i][3] = csvData.getComment();
+                    data[i][5] = csvData.getComment();
                 } else {
                     data[i][0] = "";
-                    data[i][3] = "";
+                    data[i][5] = "";
                 }
                 data[i][1] = fieldData.getSrgName();
                 data[i][2] = fieldData.getObfName();
-                data[i][4] = fieldData.isClientOnly();
+                data[i][3] = fieldData.getIntermediaryName();
+                data[i][4] = fieldData.getCursedName();
+                data[i][6] = fieldData.isClientOnly();
                 i++;
             }
         }

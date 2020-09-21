@@ -1,19 +1,30 @@
-MCP Mapping Viewer
+Cursed-Interpolator
 =================
-A small GUI for viewing the mappings from Minecraft obfuscated code names to MCP code names.
+A small GUI for viewing the mappings from Minecraft obfuscated code names to MCP code names that can also be used to compare MCP to Cursed/Plasma/BIN mappings.
+
+THIS IS NOT RELATED TO MCP-MAPPINGS-VIEWER AT ALL. ANY ISSUES YOU HAVE WITH THIS SHOULD BE REPORTED HERE!
+
+* * *
 
 ### Links of Interest
+ - [Glass-Launcher](https://glass-launcher.net) (Not related, but my main project)
+ - [Releases](releases)
+ - [Issue Tracking System](issues)
+
+* * *
+
+### How to build from the source code ####
+
+1. Clone this repository.
+2. Run `./gradlew build` on *nix or `gradlew.bat build` on windows.
+3. The jar file is created in the `/build/libs` folder. Use the -all file unless you know what you are doing.
+
+* * *
+
+### MCP Mapping Viewer Links of Interest
  - [Official Minecraft Forum Thread](http://www.minecraftforum.net/topic/2115030-)
  - [Binary Downloads](http://bspk.rs/MC/MCPMappingViewer/index.html)
  - [Issue Tracking System](https://github.com/bspkrs/MCPMappingViewer/issues)
- 
-* * *
-
-#### How to build from the source code ####
-
-1. Clone this repository.
-2. Run build.bat or build.sh.
-3. The jar file is created in the /bin folder.
 
 * * *
 

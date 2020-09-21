@@ -23,15 +23,19 @@ public class MethodSrgData implements Comparable<MethodSrgData> {
     private final String srgPkg;
     private final String srgName;
     private final String srgDescriptor;
+    private final String cursedName;
+    private final String intermediaryName;
     private final boolean isClientOnly;
 
-    public MethodSrgData(String obfOwner, String obfName, String obfDescriptor, String srgOwner, String srgPkg, String srgName, String srgDescriptor, boolean isClientOnly) {
+    public MethodSrgData(String obfOwner, String obfName, String obfDescriptor, String srgOwner, String srgPkg, String srgName, String intermediaryName, String cursedName, String srgDescriptor, boolean isClientOnly) {
         this.obfOwner = obfOwner;
         this.obfName = obfName;
         this.obfDescriptor = obfDescriptor;
         this.srgOwner = srgOwner;
         this.srgPkg = srgPkg;
         this.srgName = srgName;
+        this.intermediaryName = intermediaryName;
+        this.cursedName = cursedName;
         this.srgDescriptor = srgDescriptor;
         this.isClientOnly = isClientOnly;
     }
@@ -58,6 +62,14 @@ public class MethodSrgData implements Comparable<MethodSrgData> {
 
     public String getSrgDescriptor() {
         return srgDescriptor;
+    }
+
+    public String getCursedName() {
+        return cursedName;
+    }
+
+    public String getIntermediaryName() {
+        return intermediaryName;
     }
 
     public boolean isClientOnly() {

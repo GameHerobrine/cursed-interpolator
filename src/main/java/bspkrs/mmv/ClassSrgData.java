@@ -19,13 +19,17 @@ public class ClassSrgData implements Comparable<ClassSrgData> {
     public static SortType sortType = SortType.PKG;
     private final String obfName;
     private final String srgName;
+    private final String cursedName;
+    private final String intermediaryName;
     private final boolean isClientOnly;
     private String srgPkgName;
 
-    public ClassSrgData(String obfName, String srgName, String srgPkgName, boolean isClientOnly) {
+    public ClassSrgData(String obfName, String srgName, String srgPkgName, String intName, String cursedName, boolean isClientOnly) {
         this.obfName = obfName;
         this.srgName = srgName;
         this.srgPkgName = srgPkgName;
+        this.intermediaryName = intName;
+        this.cursedName = cursedName;
         this.isClientOnly = isClientOnly;
     }
 
@@ -44,6 +48,14 @@ public class ClassSrgData implements Comparable<ClassSrgData> {
     public ClassSrgData setSrgPkgName(String pkg) {
         this.srgPkgName = pkg;
         return this;
+    }
+
+    public String getCursedName() {
+        return cursedName;
+    }
+
+    public String getIntermediaryName() {
+        return intermediaryName;
     }
 
     public boolean isClientOnly() {

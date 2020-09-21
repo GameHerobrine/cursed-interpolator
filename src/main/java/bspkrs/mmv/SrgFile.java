@@ -17,10 +17,21 @@
  */
 package bspkrs.mmv;
 
+import net.fabricmc.mappings.ClassEntry;
+import net.fabricmc.mappings.EntryTriple;
+import net.fabricmc.mappings.FieldEntry;
+import net.fabricmc.mappings.Mappings;
+import net.fabricmc.mappings.MethodEntry;
+import net.glasslauncher.cursedinterpolator.objects.ClassMappingEntry;
+import net.glasslauncher.cursedinterpolator.objects.MappingEntry;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -37,8 +48,45 @@ public class SrgFile {
     public final Map<String, ClassSrgData> srgMethod2ClassData = new TreeMap<>();            // func_12345_a -> ClassSrgData
     public final Map<String, ClassSrgData> srgField2ClassData = new TreeMap<>();            // field_12345_a -> ClassSrgData
 
-    public SrgFile(File f) throws IOException {
+    public SrgFile(File f, Mappings mappings, CsvFile csvFieldData, CsvFile csvMethodData, String side) throws IOException {
         Scanner in = new Scanner(new BufferedReader(new FileReader(f)));
+
+        HashMap<String, MappingEntry> methods = new HashMap<>();
+        for (MethodEntry method : mappings.getMethodEntries()) {
+            if (method != null) {
+                EntryTriple entryObf = method.get(side);
+                if (entryObf != null) {
+                    EntryTriple entryInt = method.get("intermediary");
+                    EntryTriple entryNamed = method.get("named");
+                    methods.put(entryObf.getOwner() + "/" + entryObf.getName() + "|" + entryObf.getDesc(), new MappingEntry(entryObf, entryInt, entryNamed));
+                }
+            }
+        }
+
+        HashMap<String, MappingEntry> fields = new HashMap<>();
+        for (FieldEntry field : mappings.getFieldEntries()) {
+            if (field != null) {
+                EntryTriple entryObf = field.get(side);
+                if (entryObf != null) {
+                    EntryTriple entryInt = field.get("intermediary");
+                    EntryTriple entryNamed = field.get("named");
+                    fields.put(entryObf.getOwner() + "/" + entryObf.getName(), new MappingEntry(entryObf, entryInt, entryNamed));
+                }
+            }
+        }
+
+        HashMap<String, ClassMappingEntry> classes = new HashMap<>();
+        for (ClassEntry clas : mappings.getClassEntries()) {
+            if (clas != null) {
+                String entryObf = clas.get(side);
+                if (entryObf != null) {
+                    String entryInt = clas.get("intermediary");
+                    String entryNamed = clas.get("named");
+                    classes.put(entryObf, new ClassMappingEntry(entryObf, entryInt, entryNamed));
+                }
+            }
+        }
+
         try {
             while (in.hasNextLine()) {
                 if (in.hasNext("CL:")) {
@@ -49,7 +97,12 @@ public class SrgFile {
                     String srgName = getLastComponent(deobf);
                     String pkgName = deobf.substring(0, deobf.lastIndexOf('/'));
 
-                    ClassSrgData classData = new ClassSrgData(obf, srgName, pkgName, in.hasNext("#C"));
+                    ClassMappingEntry mappingEntry = classes.get(obf);
+                    if (mappingEntry == null) {
+                        mappingEntry = new ClassMappingEntry("", "", "");
+                    }
+
+                    ClassSrgData classData = new ClassSrgData(obf, srgName, pkgName, mappingEntry.getIntermediaryName(), mappingEntry.getCursedName(), in.hasNext("#C"));
 
                     if (!srgPkg2ClassDataSet.containsKey(pkgName))
                         srgPkg2ClassDataSet.put(pkgName, new TreeSet<>());
@@ -66,15 +119,27 @@ public class SrgFile {
                     // FD: aql/c net/minecraft/block/BlockStoneBrick/field_94408_c #C
                     in.next(); // skip FD:
                     String[] obf = in.next().split("/");
-                    String obfOwner = obf[0];
-                    String obfName = obf[1];
+                    String obfOwner = String.join("/", Arrays.copyOf(obf, obf.length - 1));
+                    String obfName = obf[obf.length - 1];
                     String deobf = in.next();
                     String srgName = getLastComponent(deobf);
                     String srgPkg = deobf.substring(0, deobf.lastIndexOf('/'));
                     String srgOwner = getLastComponent(srgPkg);
                     srgPkg = srgPkg.substring(0, srgPkg.lastIndexOf('/'));
 
-                    FieldSrgData fieldData = new FieldSrgData(obfOwner, obfName, srgOwner, srgPkg, srgName, in.hasNext("#C"));
+                    MappingEntry field = fields.get(obfOwner + "/" + obfName);
+                    String intName;
+                    String cursedName;
+                    if (field != null) {
+                        intName = field.getIntermediary().getName();
+                        cursedName = field.getCursed().getName();
+                    }
+                    else {
+                        intName = "";
+                        cursedName = "";
+                    }
+
+                    FieldSrgData fieldData = new FieldSrgData(obfOwner, obfName, srgOwner, srgPkg, srgName, intName, cursedName, in.hasNext("#C"));
 
                     srgName2FieldData.put(srgName, fieldData);
                     class2FieldDataSet.get(srgName2ClassData.get(srgPkg + "/" + srgOwner)).add(fieldData);
@@ -83,8 +148,8 @@ public class SrgFile {
                     // MD: aor/a (Lmt;)V net/minecraft/block/BlockHay/func_94332_a (Lnet/minecraft/client/renderer/texture/IconRegister;)V #C
                     in.next(); // skip MD:
                     String[] obf = in.next().split("/");
-                    String obfOwner = obf[0];
-                    String obfName = obf[1];
+                    String obfOwner = String.join("/", Arrays.copyOf(obf, obf.length - 1));
+                    String obfName = obf[obf.length - 1];
                     String obfDescriptor = in.next();
                     String deobf = in.next();
                     String srgName = getLastComponent(deobf);
@@ -93,7 +158,19 @@ public class SrgFile {
                     srgPkg = srgPkg.substring(0, srgPkg.lastIndexOf('/'));
                     String srgDescriptor = in.next();
 
-                    MethodSrgData methodData = new MethodSrgData(obfOwner, obfName, obfDescriptor, srgOwner, srgPkg, srgName, srgDescriptor, in.hasNext("#C"));
+                    MappingEntry method = methods.get(obfOwner + "/" + obfName + "|" + obfDescriptor);
+                    String intName;
+                    String cursedName;
+                    if (method != null) {
+                        intName = method.getIntermediary().getName();
+                        cursedName = method.getCursed().getName();
+                    }
+                    else {
+                        intName = "";
+                        cursedName = "";
+                    }
+
+                    MethodSrgData methodData = new MethodSrgData(obfOwner, obfName, obfDescriptor, srgOwner, srgPkg, srgName, intName, cursedName, srgDescriptor, in.hasNext("#C"));
 
                     srgName2MethodData.put(srgName, methodData);
                     class2MethodDataSet.get(srgName2ClassData.get(srgPkg + "/" + srgOwner)).add(methodData);

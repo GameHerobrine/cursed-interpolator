@@ -1,3 +1,8 @@
+1.1 - 21-Sep-2020
+- add support for tiny-mapping files for Cursed/Plasma and BIN mappings
+- made it so the version is retrieved from META-INF
+- fixed a couple of potential NPEs
+- redone code style to somewhat match my (calmilamsy's) code style
 0.2.2 - 14-Nov-2013
 - proper fixed CsvFile parser defect
 0.2.1 - 14-Nov-2013

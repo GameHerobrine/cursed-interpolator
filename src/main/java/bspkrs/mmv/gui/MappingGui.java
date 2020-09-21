@@ -529,13 +529,17 @@ public class MappingGui extends JFrame {
                         "Copyright (C) 2013 bspkrs<br/>" +
                         "Portions Copyright (C) 2013 Alex \"immibis\" Campbell<br/><br/>" +
                         "Author: calmilamsy<br/><br/>" +
-                        "Credits: " +
+                        "<h3>Credits:</h3>" +
                         "bspkrs (for the <a href=\"https://github.com/bspkrs/MCPMappingViewer\">program this is a fork of</a>), " +
                         "immibis (for <a href=\"https://github.com/immibis/bearded-octo-nemesis\">BON</a> code), " +
                         "Searge et al (for <a href=\"http://mcp.ocean-labs.de\">MCP</a>),<br/>" +
                         "Fabric (for <a href=\"https://fabricmc.net\">Enigma</a>), " +
                         "Cursed Fabric (for <a href=\"https://minecraft-cursed-legacy.github.io/\">Their unified b1.7.3 JAR</a>)<br/><br/>" +
-                        "<h3>Original links:</h3>" +
+                        "<h3>Cursed Interpolator Links:</h3>" +
+                        "<a href=\"https://github.com/calmilamsy/cursed-interpolator\">Github Repo</a><br/>" +
+                        "<a href=\"https://github.com/calmilamsy/cursed-interpolator/blob/master/change.log\">Change Log</a><br/>" +
+                        "<a href=\"https://github.com/calmilamsy/cursed-interpolator/releases\">Binary Downloads</a><br/>" +
+                        "<h3>MCP Mapping Viewer links:</h3>" +
                         "<a href=\"" + mcfTopic + "\">MCF Thread</a><br/>" +
                         "<a href=\"https://github.com/bspkrs/MCPMappingViewer\">Github Repo</a><br/>" +
                         "<a href=\"https://github.com/bspkrs/MCPMappingViewer/blob/master/change.log\">Change Log</a><br/>" +
