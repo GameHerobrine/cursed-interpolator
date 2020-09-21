@@ -9,10 +9,19 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven {
+        name = "Jitpack"
+        url 'https://jitpack.io/'
+    }
+    maven {
+        name = "Fabric"
+        url = "https://maven.fabricmc.net/"
+    }
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile "com.github.chocohead:tiny-mappings-parser:d96d407"
 }
 
 jar {
