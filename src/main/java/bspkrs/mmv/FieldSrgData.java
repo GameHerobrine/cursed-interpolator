@@ -77,6 +77,6 @@ public class FieldSrgData implements Comparable<FieldSrgData> {
     }
 
     public boolean contains(String s) {
-        return srgName.contains(s) || obfName.contains(s);
+        return srgName.contains(s) || obfName.contains(s) || cursedName.contains(s) || intermediaryName.contains(s);
     }
 }

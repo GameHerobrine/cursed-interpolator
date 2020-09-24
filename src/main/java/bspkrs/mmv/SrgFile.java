@@ -102,7 +102,14 @@ public class SrgFile {
                         mappingEntry = new ClassMappingEntry("", "", "");
                     }
 
-                    ClassSrgData classData = new ClassSrgData(obf, srgName, pkgName, mappingEntry.getIntermediaryName(), mappingEntry.getCursedName(), in.hasNext("#C"));
+                    String[] intParts = mappingEntry.getIntermediaryName().split("/");
+                    String intPkg = String.join("/", Arrays.copyOf(intParts, intParts.length-1));
+
+
+                    String[] cursedParts = mappingEntry.getCursedName().split("/");
+                    String cursedPkg = String.join("/", Arrays.copyOf(cursedParts, cursedParts.length-1));
+
+                    ClassSrgData classData = new ClassSrgData(obf, srgName, pkgName, intParts[intParts.length-1], cursedParts[cursedParts.length-1], intPkg, cursedPkg, in.hasNext("#C"));
 
                     if (!srgPkg2ClassDataSet.containsKey(pkgName))
                         srgPkg2ClassDataSet.put(pkgName, new TreeSet<>());
@@ -161,16 +168,43 @@ public class SrgFile {
                     MappingEntry method = methods.get(obfOwner + "/" + obfName + "|" + obfDescriptor);
                     String intName;
                     String cursedName;
+                    String intPkg;
+                    String cursedPkg;
+                    String intOwner;
+                    String cursedOwner;
+                    String intDescriptor;
+                    String cursedDescriptor;
                     if (method != null) {
-                        intName = method.getIntermediary().getName();
-                        cursedName = method.getCursed().getName();
+                        EntryTriple intermediary = method.getIntermediary();
+                        EntryTriple cursed = method.getCursed();
+
+                        intName = intermediary.getName();
+                        cursedName = cursed.getName();
+                        intOwner = intermediary.getOwner();
+                        cursedOwner = cursed.getOwner();
+                        intDescriptor = intermediary.getDesc();
+                        cursedDescriptor = cursed.getDesc();
+
+                        String[] intParts = intName.split("/");
+                        intPkg = String.join("/", Arrays.copyOf(intParts, intParts.length-1));
+                        intName = intParts[intParts.length - 1];
+
+                        String[] cursedParts = cursedName.split("/");
+                        cursedPkg = String.join("/", Arrays.copyOf(cursedParts, cursedParts.length-1));
+                        cursedName = cursedParts[cursedParts.length - 1];
                     }
                     else {
                         intName = "";
                         cursedName = "";
+                        intPkg = "";
+                        cursedPkg = "";
+                        intOwner = "";
+                        cursedOwner = "";
+                        intDescriptor = "";
+                        cursedDescriptor = "";
                     }
 
-                    MethodSrgData methodData = new MethodSrgData(obfOwner, obfName, obfDescriptor, srgOwner, srgPkg, srgName, intName, cursedName, srgDescriptor, in.hasNext("#C"));
+                    MethodSrgData methodData = new MethodSrgData(obfOwner, obfName, obfDescriptor, srgOwner, srgPkg, srgName, intName, cursedName, intPkg, intOwner, intDescriptor, cursedPkg, cursedOwner, cursedDescriptor, srgDescriptor, in.hasNext("#C"));
 
                     srgName2MethodData.put(srgName, methodData);
                     class2MethodDataSet.get(srgName2ClassData.get(srgPkg + "/" + srgOwner)).add(methodData);

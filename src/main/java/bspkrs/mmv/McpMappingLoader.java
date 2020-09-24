@@ -225,9 +225,9 @@ public class McpMappingLoader {
 
     public static class ClassModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
-        public final String[] columnNames = {"Pkg name", "SRG name", "Obf name", "Intermediary name", "Cursed name", "Client Only"};
-        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, Boolean.class};
-        private final boolean[] isColumnEditable = {false, false, false, false, false, false};
+        public final String[] columnNames = {"Pkg Name", "SRG Name", "Obf Name", "Intermediary Pkg", "Intermediary Name", "Cursed Pkg", "Cursed Name", "Client Only"};
+        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, String.class, String.class, Boolean.class};
+        private final boolean[] isColumnEditable = {false, false, false, false, false, false, false, false};
         private final Object[][] data;
         private final Collection<ClassSrgData> collectionRef;
 
@@ -241,9 +241,11 @@ public class McpMappingLoader {
                 data[i][0] = classData.getSrgPkgName();
                 data[i][1] = classData.getSrgName();
                 data[i][2] = classData.getObfName();
-                data[i][3] = classData.getIntermediaryName();
-                data[i][4] = classData.getCursedName();
-                data[i][5] = classData.isClientOnly();
+                data[i][3] = classData.getIntermediaryPkg();
+                data[i][4] = classData.getIntermediaryName();
+                data[i][5] = classData.getCursedPkg();
+                data[i][6] = classData.getCursedName();
+                data[i][7] = classData.isClientOnly();
                 i++;
             }
         }
@@ -289,9 +291,9 @@ public class McpMappingLoader {
 
     public class MethodModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
-        private final String[] columnNames = {"MCP Name", "SRG Name", "Obf Name", "SRG Descriptor", "Intermediary name", "Cursed name", "Comment", "Client Only"};
-        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, String.class, String.class, Boolean.class};
-        private final boolean[] isColumnEditable = {false, false, false, false, false, false, false, false};
+        private final String[] columnNames = {"MCP Name", "SRG Name", "Obf Name", "SRG Descriptor", "Intermediary Name", "Cursed Name", "Intermediary Descriptor", "Cursed Descriptor", "Comment", "Client Only"};
+        private final Class[] columnTypes = {String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, Boolean.class};
+        private final boolean[] isColumnEditable = {false, false, false, false, false, false, false, false, false, false};
         private final Object[][] data;
         private final Set<MethodSrgData> setRef;
 
@@ -304,17 +306,19 @@ public class McpMappingLoader {
                 CsvData csvData = srgMethodData2CsvData.get(methodData);
                 if (csvData != null) {
                     data[i][0] = csvData.getMcpName();
-                    data[i][6] = csvData.getComment();
+                    data[i][8] = csvData.getComment();
                 } else {
                     data[i][0] = "";
-                    data[i][6] = "";
+                    data[i][8] = "";
                 }
                 data[i][1] = methodData.getSrgName();
                 data[i][2] = methodData.getObfName();
                 data[i][3] = methodData.getSrgDescriptor();
                 data[i][4] = methodData.getIntermediaryName();
                 data[i][5] = methodData.getCursedName();
-                data[i][7] = methodData.isClientOnly();
+                data[i][6] = methodData.getIntermediaryDescriptor();
+                data[i][7] = methodData.getCursedDescriptor();
+                data[i][9] = methodData.isClientOnly();
                 i++;
             }
         }

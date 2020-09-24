@@ -25,9 +25,15 @@ public class MethodSrgData implements Comparable<MethodSrgData> {
     private final String srgDescriptor;
     private final String cursedName;
     private final String intermediaryName;
+    private final String cursedPkg;
+    private final String intermediaryPkg;
+    private final String cursedOwner;
+    private final String intermediaryOwner;
+    private final String cursedDescriptor;
+    private final String intermediaryDescriptor;
     private final boolean isClientOnly;
 
-    public MethodSrgData(String obfOwner, String obfName, String obfDescriptor, String srgOwner, String srgPkg, String srgName, String intermediaryName, String cursedName, String srgDescriptor, boolean isClientOnly) {
+    public MethodSrgData(String obfOwner, String obfName, String obfDescriptor, String srgOwner, String srgPkg, String srgName, String intermediaryName, String cursedName, String intPkg, String intOwner, String intDescriptor, String cursedPkg, String cursedOwner, String cursedDescriptor, String srgDescriptor, boolean isClientOnly) {
         this.obfOwner = obfOwner;
         this.obfName = obfName;
         this.obfDescriptor = obfDescriptor;
@@ -38,6 +44,12 @@ public class MethodSrgData implements Comparable<MethodSrgData> {
         this.cursedName = cursedName;
         this.srgDescriptor = srgDescriptor;
         this.isClientOnly = isClientOnly;
+        this.intermediaryPkg = intPkg;
+        this.intermediaryOwner = intOwner;
+        this.intermediaryDescriptor = intDescriptor;
+        this.cursedPkg = cursedPkg;
+        this.cursedOwner = cursedOwner;
+        this.cursedDescriptor = cursedDescriptor;
     }
 
     public String getObfOwner() {
@@ -72,6 +84,30 @@ public class MethodSrgData implements Comparable<MethodSrgData> {
         return intermediaryName;
     }
 
+    public String getCursedPkg() {
+        return cursedPkg;
+    }
+
+    public String getIntermediaryPkg() {
+        return intermediaryPkg;
+    }
+
+    public String getCursedOwner() {
+        return cursedOwner;
+    }
+
+    public String getIntermediaryOwner() {
+        return intermediaryOwner;
+    }
+
+    public String getCursedDescriptor() {
+        return cursedDescriptor;
+    }
+
+    public String getIntermediaryDescriptor() {
+        return intermediaryDescriptor;
+    }
+
     public boolean isClientOnly() {
         return isClientOnly;
     }
@@ -89,6 +125,6 @@ public class MethodSrgData implements Comparable<MethodSrgData> {
     }
 
     public boolean contains(String s) {
-        return srgName.contains(s) || obfName.contains(s);
+        return srgName.contains(s) || obfName.contains(s) || cursedName.contains(s) || intermediaryName.contains(s);
     }
 }

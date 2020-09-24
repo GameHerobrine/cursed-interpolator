@@ -21,15 +21,19 @@ public class ClassSrgData implements Comparable<ClassSrgData> {
     private final String srgName;
     private final String cursedName;
     private final String intermediaryName;
+    private final String cursedPkg;
+    private final String intermediaryPkg;
     private final boolean isClientOnly;
     private String srgPkgName;
 
-    public ClassSrgData(String obfName, String srgName, String srgPkgName, String intName, String cursedName, boolean isClientOnly) {
+    public ClassSrgData(String obfName, String srgName, String srgPkgName, String intName, String cursedName, String intPkg, String cursedPkg, boolean isClientOnly) {
         this.obfName = obfName;
         this.srgName = srgName;
         this.srgPkgName = srgPkgName;
         this.intermediaryName = intName;
         this.cursedName = cursedName;
+        this.intermediaryPkg = intPkg;
+        this.cursedPkg = cursedPkg;
         this.isClientOnly = isClientOnly;
     }
 
@@ -58,6 +62,14 @@ public class ClassSrgData implements Comparable<ClassSrgData> {
         return intermediaryName;
     }
 
+    public String getCursedPkg() {
+        return cursedPkg;
+    }
+
+    public String getIntermediaryPkg() {
+        return intermediaryPkg;
+    }
+
     public boolean isClientOnly() {
         return isClientOnly;
     }
@@ -84,7 +96,7 @@ public class ClassSrgData implements Comparable<ClassSrgData> {
     }
 
     public boolean contains(String s) {
-        return srgName.contains(s) || obfName.contains(s) || this.srgPkgName.contains(s);
+        return srgName.contains(s) || obfName.contains(s) || this.srgPkgName.contains(s) || cursedName.contains(s) || intermediaryName.contains(s) || cursedPkg.contains(s) || intermediaryPkg.contains(s);
     }
 
     public enum SortType {
