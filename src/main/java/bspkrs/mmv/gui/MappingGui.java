@@ -21,7 +21,7 @@ import bspkrs.mmv.McpMappingLoader.CantLoadMCPMappingException;
 import immibis.bon.IProgressListener;
 import immibis.bon.gui.Reference;
 import immibis.bon.gui.Side;
-import net.glasslauncher.cursedinterpolator.gui.CursedMappingsPanel;
+import net.glasslauncher.cursedinterpolator.gui.VersionDownloadPanel;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -456,7 +456,7 @@ public class MappingGui extends JFrame {
 
         JButton setupCursed = new JButton("Setup Cursed");
         setupCursed.addActionListener((event) -> {
-            new CursedMappingsPanel(frmMcpMappingViewer);
+            new VersionDownloadPanel(frmMcpMappingViewer, (String) cmbMCPDirPath.getSelectedItem());
         });
         pnlControls.add(setupCursed);
 
@@ -720,6 +720,9 @@ public class MappingGui extends JFrame {
             final File mcpDir = mcpBrowseDir.val;
 
             String error = null;
+
+            if (!(new File(mcpDir, "conf/interpolator/mappings.tiny")).exists())
+                error = "Cursed mapping have not been set up!";
 
             if (!mcpDir.isDirectory())
                 error = "Folder not found (at " + mcpDir + ")";

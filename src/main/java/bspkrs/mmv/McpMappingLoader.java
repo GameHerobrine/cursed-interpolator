@@ -96,7 +96,7 @@ public class McpMappingLoader {
             progress.setMax(4);
         if (progress != null)
             progress.set(0);
-        Mappings mappings = MappingsProvider.readTinyMappings(new FileInputStream(new File(mcpDir, "conf/mappings.tiny")));
+        Mappings mappings = MappingsProvider.readTinyMappings(new FileInputStream(new File(mcpDir, "conf/interpolator/mappings.tiny")));
         if (progress != null)
             progress.set(1);
         loadCSVMapping();

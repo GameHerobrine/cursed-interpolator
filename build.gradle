@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'net.glasslauncher'
-version '1.1'
+version '1.2'
 
 sourceCompatibility = 1.8
 
@@ -18,6 +18,10 @@ repositories {
         name = "Fabric"
         url = "https://maven.fabricmc.net/"
     }
+    maven {
+        name = "Glass"
+        url = "https://maven.glass-launcher.net/repo/"
+    }
 }
 
 tasks.build.dependsOn(tasks.shadowJar)
@@ -25,6 +29,8 @@ tasks.build.dependsOn(tasks.shadowJar)
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile "com.github.chocohead:tiny-mappings-parser:d96d407"
+    implementation 'com.google.code.gson:gson:2.8.6'
+    compile "net.glasslauncher:commons:1.0"
 }
 
 jar {
