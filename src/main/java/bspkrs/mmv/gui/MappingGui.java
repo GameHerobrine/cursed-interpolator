@@ -21,6 +21,7 @@ import bspkrs.mmv.McpMappingLoader.CantLoadMCPMappingException;
 import immibis.bon.IProgressListener;
 import immibis.bon.gui.Reference;
 import immibis.bon.gui.Side;
+import net.glasslauncher.cursedinterpolator.gui.CursedMappingsPanel;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -299,39 +300,48 @@ public class MappingGui extends JFrame {
     }
 
     private void loadPrefs() {
-        for (int i = 0; i < 8; i++) {
-            String item = prefs.get(PREFS_KEY_MCPDIR + i, "");
-            if (!item.equals("")) {
-                DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) cmbMCPDirPath.getModel();
-                if (model.getIndexOf(item) == -1)
-                    cmbMCPDirPath.addItem(item);
+        try {
+            for (int i = 0; i < 8; i++) {
+                String item = prefs.get(PREFS_KEY_MCPDIR + i, "");
+                if (!item.equals("")) {
+                    DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) cmbMCPDirPath.getModel();
+                    if (model.getIndexOf(item) == -1)
+                        cmbMCPDirPath.addItem(item);
+                }
             }
+
+            if (cmbMCPDirPath.getItemCount() > 0) {
+                btnRefreshTables.setEnabled(true);
+                cmbMCPDirPath.setSelectedIndex(0);
+            } else
+                btnRefreshTables.setEnabled(false);
+
+            Side side = Side.valueOf(prefs.get(PREFS_KEY_SIDE, Side.Universal.toString()));
+            cmbSide.setSelectedItem(side);
+
+            classSort.clear();
+            methodSort.clear();
+            fieldSort.clear();
+
+            int i = prefs.getInt(PREFS_KEY_CLASS_SORT, 1);
+            classSort.add(new RowSorter.SortKey(Math.abs(i) - 1, (i > 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING)));
+            tblClasses.getRowSorter().setSortKeys(classSort);
+
+            i = prefs.getInt(PREFS_KEY_METHOD_SORT, 1);
+            methodSort.add(new RowSorter.SortKey(Math.abs(i) - 1, (i > 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING)));
+            tblMethods.getRowSorter().setSortKeys(methodSort);
+
+            i = prefs.getInt(PREFS_KEY_FIELD_SORT, 1);
+            fieldSort.add(new RowSorter.SortKey(Math.abs(i) - 1, (i > 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING)));
+            tblFields.getRowSorter().setSortKeys(fieldSort);
+        } catch (Exception e) {
+            try {
+                prefs.clear();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+            e.printStackTrace();
         }
-
-        if (cmbMCPDirPath.getItemCount() > 0) {
-            btnRefreshTables.setEnabled(true);
-            cmbMCPDirPath.setSelectedIndex(0);
-        } else
-            btnRefreshTables.setEnabled(false);
-
-        Side side = Side.valueOf(prefs.get(PREFS_KEY_SIDE, Side.Universal.toString()));
-        cmbSide.setSelectedItem(side);
-
-        classSort.clear();
-        methodSort.clear();
-        fieldSort.clear();
-
-        int i = prefs.getInt(PREFS_KEY_CLASS_SORT, 1);
-        classSort.add(new RowSorter.SortKey(Math.abs(i) - 1, (i > 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING)));
-        tblClasses.getRowSorter().setSortKeys(classSort);
-
-        i = prefs.getInt(PREFS_KEY_METHOD_SORT, 1);
-        methodSort.add(new RowSorter.SortKey(Math.abs(i) - 1, (i > 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING)));
-        tblMethods.getRowSorter().setSortKeys(methodSort);
-
-        i = prefs.getInt(PREFS_KEY_FIELD_SORT, 1);
-        fieldSort.add(new RowSorter.SortKey(Math.abs(i) - 1, (i > 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING)));
-        tblFields.getRowSorter().setSortKeys(fieldSort);
     }
 
     /**
@@ -355,7 +365,7 @@ public class MappingGui extends JFrame {
             }
         });
         frmMcpMappingViewer.setTitle("Cursed Interpolator " + VERSION_NUMBER);
-        frmMcpMappingViewer.setBounds(100, 100, 925, 621);
+        frmMcpMappingViewer.setBounds(100, 100, 955, 621);
         frmMcpMappingViewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frmMcpMappingViewer.getContentPane().setLayout(new BorderLayout(0, 0));
 
@@ -443,6 +453,12 @@ public class MappingGui extends JFrame {
         JButton btnBrowseFile = new JButton("Browse");
         btnBrowseFile.addActionListener(new BrowseActionListener(cmbMCPDirPath, true, btnBrowseFile, true, mcpBrowseDir));
         pnlControls.add(btnBrowseFile);
+
+        JButton setupCursed = new JButton("Setup Cursed");
+        setupCursed.addActionListener((event) -> {
+            new CursedMappingsPanel(frmMcpMappingViewer);
+        });
+        pnlControls.add(setupCursed);
 
         btnRefreshTables = new JButton("Load from conf");
         btnRefreshTables.setEnabled(false);
@@ -661,7 +677,7 @@ public class MappingGui extends JFrame {
                     new TableColumnAdjuster(tblClasses).adjustColumns();
                     loadPrefs();
                 } catch (Exception e1) {
-                    String s = getStackTraceMessage("An error has occurred - give bspkrs this stack trace (which has been copied to the clipboard)\n", e1);
+                    String s = getStackTraceMessage("An error has occurred - give calmilamsy this stack trace (which has been copied to the clipboard)\n", e1);
 
                     System.err.println(s);
 
@@ -794,7 +810,7 @@ public class MappingGui extends JFrame {
                         JOptionPane.showMessageDialog(MappingGui.this, errMsg, "MMV - Error", JOptionPane.ERROR_MESSAGE);
                     });
                 } catch (Exception e1) {
-                    String s = getStackTraceMessage("An error has occurred - give bspkrs this stack trace (which has been copied to the clipboard)\n", e1);
+                    String s = getStackTraceMessage("An error has occurred - give calmilamsy this stack trace (which has been copied to the clipboard)\n", e1);
 
                     System.err.println(s);
 

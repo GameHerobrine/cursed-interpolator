@@ -24,6 +24,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -42,36 +45,26 @@ public class CsvFile {
     }
 
     public void readFromFile() throws IOException {
-        try (Scanner in = new Scanner(new BufferedReader(new FileReader(file)))) {
-            in.useDelimiter("[,\\n]");
-            in.nextLine(); // Skip header row
-            try {
-                while (in.hasNextLine()) {
-                    String srgName = in.next().replace("\"", "");
-                    String mcpName = in.next().replace("\"", "");
-                    String obfName = in.next().replace("\"", "");
-                    in.next(); // Skip signatures
-                    in.next();
-                    in.next(); // Skip parent classes
-                    in.next();
-                    String pkg = in.next().replace("\"", "");
-                    String side = in.next().replace("\"", "");
-                    String comment;
-                    if (!side.endsWith("\r")) {
-                        comment = in.next().replace("\r", "");
-                    }
-                    else {
-                        side = side.replace("\r", "");
-                        comment = "";
-                    }
-                    //String comment = in.nextLine();
-                    //comment = comment.substring(1); // removes the ','
-                    if (sideIn(Integer.parseInt(side), this.side.intSide))
-                        srgName2CsvData.put(srgName, new CsvData(srgName, mcpName, Integer.parseInt(side), comment));
-                }
-            } catch (NoSuchElementException e) {
-                System.out.println("Found EOF!");
+        String in = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())), StandardCharsets.UTF_8);
+        String[] lines = in.replace("\n", "").split("\n");
+        boolean trip = false;
+        for (String line : lines) {
+            if (!trip) {
+                trip = true;
+                continue;
             }
+            String[] lineParts = line.replace("\"", "").split(",");
+            String srgName = lineParts[0];
+            String mcpName = lineParts[1];
+            String obfName = lineParts[2];
+            String pkg = lineParts[7];
+            String side = lineParts[8];
+            String comment = "";
+            if (lineParts.length > 9) {
+                comment = lineParts[9];
+            }
+            if (sideIn(Integer.parseInt(side), this.side.intSide))
+                srgName2CsvData.put(srgName, new CsvData(srgName, mcpName, Integer.parseInt(side), comment));
         }
     }
 
