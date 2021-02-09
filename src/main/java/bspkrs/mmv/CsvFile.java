@@ -46,7 +46,7 @@ public class CsvFile {
 
     public void readFromFile() throws IOException {
         String in = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())), StandardCharsets.UTF_8);
-        String[] lines = in.replace("\n", "").split("\n");
+        String[] lines = in.replace("\r", "").split("\n");
         boolean trip = false;
         for (String line : lines) {
             if (!trip) {
