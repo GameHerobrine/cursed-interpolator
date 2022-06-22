@@ -23,6 +23,7 @@ public class VersionDownloadPanel extends JDialog {
         JComboBox<String> repoBox = new JComboBox<>();
         repoBox.addItem("calmilamsy/BIN-Mappings");
         repoBox.addItem("minecraft-cursed-legacy/Plasma");
+        repoBox.addItem("paulevsGitch/BIN-Mappings-BH");
         repoBox.setPreferredSize(new Dimension(200, 22));
 
         JComboBox<String> commitBox = new JComboBox<>();
